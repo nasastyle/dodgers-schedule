@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#005A9C">
+  <title>Dodgers Schedule 2026 | LAドジャース・テレビ放送ナビ</title>
+  <link rel="preconnect" href="https://statsapi.mlb.com">
+  <link rel="preconnect" href="https://www.mlbstatic.com">
+  <link rel="icon" href="https://www.mlbstatic.com/team-logos/119.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <img src="https://www.mlbstatic.com/team-logos/119.svg" alt="LA Dodgers">
+      </div>
+      <div class="header-titles">
+        <h1>Dodgers Schedule <span class="year">2026</span></h1>
+        <p>LAドジャース・テレビ放送ナビ</p>
+      </div>
+    </div>
+    <div class="player-stats" id="playerStats">
+      <div class="player-card">
+        <img class="player-photo" src="https://img.mlbstatic.com/mlb-photos/image/upload/w_120,q_90/v1/people/660271/headshot/67/current" alt="大谷翔平">
+        <div class="player-info">
+          <p class="player-name">大谷翔平</p>
+          <p class="player-line" id="ohtaniStats">…</p>
+        </div>
+      </div>
+      <div class="player-card">
+        <img class="player-photo" src="https://img.mlbstatic.com/mlb-photos/image/upload/w_120,q_90/v1/people/808967/headshot/67/current" alt="山本由伸">
+        <div class="player-info">
+          <p class="player-name">山本由伸</p>
+          <p class="player-line" id="yamamotoStats">…</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- ① NEXT GAME -->
+    <section class="card next-game-card" id="nextGameCard">
+      <div class="ng-head">
+        <h2>NEXT GAME <span class="slash">//</span> 次回の試合予定</h2>
+        <span class="ng-type" id="ngGameType">Regular Season</span>
+      </div>
+      <div class="ng-body" id="ngBody">
+        <p class="ng-jst-label">日本時間・試合開始時刻 (JST)</p>
+        <div class="ng-datetime" id="ngDatetime">読み込み中…</div>
+        <div class="ng-teams">
+          <div class="ng-team">
+            <div class="ng-team-logo"><img id="ngLogoLeft" src="https://www.mlbstatic.com/team-logos/119.svg" alt=""></div>
+            <div class="ng-team-name" id="ngNameLeft">ドジャース</div>
+            <div class="ng-team-role" id="ngRoleLeft"></div>
+          </div>
+          <div class="ng-vs">VS</div>
+          <div class="ng-team">
+            <div class="ng-team-logo"><img id="ngLogoRight" src="" alt=""></div>
+            <div class="ng-team-name" id="ngNameRight"></div>
+            <div class="ng-team-role" id="ngRoleRight"></div>
+          </div>
+        </div>
+        <div class="ng-venue" id="ngVenue"></div>
+      </div>
+    </section>
+
+    <!-- ②③ テレビ中継情報 -->
+    <section class="card tv-card" id="tvCard">
+      <div class="tv-head">
+        <h2><span class="tv-icon">📺</span> テレビ中継情報</h2>
+      </div>
+      <div class="tv-game">
+        <div class="tv-game-info">
+          <p class="tv-opponent" id="tvOpponent">読み込み中…</p>
+          <p class="tv-datetime" id="tvDatetime"></p>
+        </div>
+        <span class="tv-status" id="tvStatus"></span>
+      </div>
+      <div class="tv-channels">
+        <div class="channel-chip free">
+          <span class="ch-label">無料放送 / BS</span>
+          <span class="ch-name"><span class="dot white"></span> NHK BS / 総合</span>
+        </div>
+        <div class="channel-chip paid">
+          <span class="ch-label">有料放送 / CS (予想)</span>
+          <span class="ch-name"><span class="dot yellow"></span> J SPORTS</span>
+        </div>
+      </div>
+      <p class="tv-note">※ 放送局は例年の中継パターンに基づく予想を含みます。実際の放送予定は各局の番組表をご確認ください。</p>
+    </section>
+
+    <!-- スケジュール -->
+    <section class="card schedule-card">
+      <div class="sched-head">
+        <h2><span class="cal-icon">🗓</span> 試合スケジュール <span class="tz-tag">日本時間</span></h2>
+      </div>
+
+      <div class="view-toggle" id="viewToggle">
+        <button class="active" data-view="calendar">カレンダー</button>
+        <button data-view="list">リスト</button>
+      </div>
+
+      <div class="month-tabs" id="monthTabs"></div>
+
+      <div class="filters">
+        <div class="filter-group">
+          <span class="filter-label">場所:</span>
+          <div class="seg" id="placeFilter">
+            <button class="active" data-place="all">全</button>
+            <button data-place="home">ホーム</button>
+            <button data-place="away">敵地</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">状況:</span>
+          <div class="seg" id="statusFilter">
+            <button class="active" data-status="all">全</button>
+            <button data-status="final">終了</button>
+            <button data-status="upcoming">予定</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="calendarView" class="calendar-wrap"></div>
+      <div id="listView" class="list-wrap" hidden></div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>© 2026 Dodgers Schedule. All data sourced from public MLB StatsAPI.</p>
+    <p class="small">本アプリは個人学習・デモ用途として作成されており、MLBおよびロサンゼルス・ドジャースの公式アプリではありません。</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
