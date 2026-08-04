@@ -116,6 +116,7 @@ function normalizeGame(g) {
   return {
     pk: g.gamePk,
     date,
+    officialDate: g.officialDate,
     dateKey: jstDateKey(date),
     monthKey: jstMonthKey(date),
     startTBD: g.status.startTimeTBD,
@@ -145,6 +146,19 @@ async function fetchSchedule() {
   (data.dates || []).forEach((d) => (d.games || []).forEach((g) => games.push(normalizeGame(g))));
   games.sort((a, b) => a.date - b.date);
   return games;
+}
+
+/* J SPORTS放送データ (GitHub Actionsが公式番組表から定期取得して data/jsports.json に保存) */
+let jsportsData = null;
+
+async function fetchJSports() {
+  try {
+    const res = await fetch("data/jsports.json", { cache: "no-store" });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
 }
 
 /* 選手の今季成績 (大谷: 660271 / 山本: 808967) */
@@ -231,6 +245,43 @@ function renderTV({ live, next, lastFinal }) {
   } else {
     stEl.textContent = "試合終了";
     stEl.className = "tv-status";
+  }
+
+  renderJSportsChannel(g);
+}
+
+/* J SPORTSのチャンネル番号(1〜4)を番組表データから特定して表示 */
+function renderJSportsChannel(g) {
+  const labelEl = document.getElementById("paidLabel");
+  const nameEl = document.getElementById("paidName");
+  const rebEl = document.getElementById("tvRebroadcast");
+
+  const prog = jsportsData?.programs?.find((p) => p.gameDate === g.officialDate);
+  if (!prog || !prog.airings?.length) return; // データなし → 「J SPORTS (予想)」のまま
+
+  const gameStart = g.date.getTime();
+  const airings = [...prog.airings].sort((a, b) => new Date(a.start) - new Date(b.start));
+
+  /* 試合開始の2時間前〜30分後に始まる放送を生中継とみなす */
+  const liveAiring = airings.find((a) => {
+    const t = new Date(a.start).getTime();
+    return t >= gameStart - 120 * 60000 && t <= gameStart + 30 * 60000;
+  });
+
+  const main = liveAiring || airings[0];
+  labelEl.textContent = liveAiring ? "有料放送 / CS 生中継" : "有料放送 / CS 録画";
+  nameEl.innerHTML = `<span class="dot yellow"></span> J SPORTS ${main.channel}`;
+
+  const rest = airings.filter((a) => a !== main && new Date(a.start) > new Date());
+  if (rest.length) {
+    const items = rest.slice(0, 3).map((a) => {
+      const p = jstParts(new Date(a.start));
+      return `${p.month}/${p.day}(${p.weekday}) ${p.hour}:${p.minute}〜 J SPORTS ${a.channel}`;
+    });
+    rebEl.innerHTML = `🔁 再放送: ${items.join(" / ")}`;
+    rebEl.hidden = false;
+  } else {
+    rebEl.hidden = true;
   }
 }
 
@@ -441,7 +492,7 @@ async function init() {
   setupControls();
   renderPlayerStats();
   try {
-    allGames = await fetchSchedule();
+    [allGames, jsportsData] = await Promise.all([fetchSchedule(), fetchJSports()]);
     const featured = pickFeaturedGames(allGames);
     renderNextGame(featured);
     renderTV(featured);
